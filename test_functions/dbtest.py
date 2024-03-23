@@ -2,7 +2,7 @@ from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from datetime import datetime
 
-from credetials import MONGOUSERNAME, MONGOPASSWORD
+from test_functions.credetials import MONGOUSERNAME, MONGOPASSWORD
 
 uri = f"mongodb+srv://{MONGOUSERNAME}:{MONGOPASSWORD}@uncommonhack.3k93vt8.mongodb.net/?retryWrites=true&w=majority&appName=UncommonHack"
 
