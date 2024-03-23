@@ -1,7 +1,7 @@
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
 from datetime import datetime
-from credetials import uri
+from credentials import uri
 
 client = MongoClient(uri, server_api=ServerApi('1'))
 

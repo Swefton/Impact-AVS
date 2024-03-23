@@ -4,7 +4,7 @@ from google.cloud import storage
 from urllib.parse import quote_plus, urlencode
 from flask import render_template
 import json
-from test_functions.credetials import AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_DOMAIN, APP_SECRET_KEY, MONGOUSERNAME, MONGOPASSWORD, GCLOUD_PROJECT_ID
+from test_functions.credentials import AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_DOMAIN, APP_SECRET_KEY, MONGOUSERNAME, MONGOPASSWORD, GCLOUD_PROJECT_ID
 from flask import request
 
 app = Flask(__name__)
