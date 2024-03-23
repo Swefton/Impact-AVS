@@ -3,15 +3,10 @@ from authlib.integrations.flask_client import OAuth
 from urllib.parse import quote_plus, urlencode
 from flask import render_template
 import json
+from credetials import AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_DOMAIN, APP_SECRET_KEY, MONGOUSERNAME, MONGOPASSWORD
 
 app = Flask(__name__)
-app.secret_key = 'Ddq96xPALr'
-
-
-AUTH0_CLIENT_ID='jfEtd4vdk4GyHPJUcJck1Wl6lzzrA5ZM'
-AUTH0_CLIENT_SECRET='IjK_KNGD7FY1hVtHtGnWD73WCReIyop9vVF95W37KtkZXjjgh9pdzPVYQ7s7HFiy'
-AUTH0_DOMAIN='dev-oye6y425565bfb2p.us.auth0.com'
-APP_SECRET_KEY='Ddq96xPALr'
+app.secret_key = APP_SECRET_KEY
 
 oauth = OAuth(app)
 
@@ -25,6 +20,7 @@ oauth.register(
     server_metadata_url=f'https://{AUTH0_DOMAIN}/.well-known/openid-configuration'
 )
 
+connection_string = f"mongodb+srv://{MONGOUSERNAME}:{MONGOPASSWORD}@uncommonhack.3k93vt8.mongodb.net/?retryWrites=true&w=majority&appName=UncommonHack"
 
 @app.route("/login")
 def login():
