@@ -73,11 +73,14 @@ def video_upload():
         storage_client = storage.Client(project=GCLOUD_PROJECT_ID)
         bucket = storage_client.bucket("journalvideoanalysis")
         blob = bucket.blob("video.mp4")
+              
+        print(blob.metadata)
         
-        generation_match_precondition = 0
-
-        blob.upload_from_file(video, if_generation_match=generation_match_precondition)
-
+        blob.upload_from_file(video)
+        blob.metadata = {'user_id': '123', 'title': 'My Video'}
+        blob.patch()
+        
+        print(blob.metadata)
         print(
             f"File {'video.mp4'} uploaded to {'journalvideoanalysis'}."
         )

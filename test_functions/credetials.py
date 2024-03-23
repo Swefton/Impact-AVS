@@ -5,3 +5,4 @@ APP_SECRET_KEY='Ddq96xPALr'
 MONGOUSERNAME='mongodbadder'
 MONGOPASSWORD='7JeXvgVz54ATft9G'
 GCLOUD_PROJECT_ID='ya29.a0Ad52N38yu7s8SPnklTtI9ihAICtG5_uzk_jik0fkdICF-jQ763_U5vE3a-AaTomegVsaoSDguIFybGfEr5wlQQUEmKRKrvvxm4jD0G1v-JJjpa28sOsRpg7t_N_rv3H0wrQVl8aW6iWJ1yydaBUvzW3RmEH-Xx8j1TuiaCgYKAVASARISFQHGX2MiXn4dnoYlLVW5nQ_zP2_6LQ0171'
+uri = f"mongodb+srv://{MONGOUSERNAME}:{MONGOPASSWORD}@uncommonhack.3k93vt8.mongodb.net/?retryWrites=true&w=majority&appName=UncommonHack"
