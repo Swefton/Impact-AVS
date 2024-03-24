@@ -13,7 +13,7 @@ import uuid
 import os
 
 
-client = MongoClient(uri, server_api=ServerApi('1'))
+client = MongoClient(os.environ.get('uri'), server_api=ServerApi('1'))
 
 def add_information(userid, info1, info2, info3, info4):
     db = client['UncommonHack']
