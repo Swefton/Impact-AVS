@@ -120,18 +120,18 @@ def get_documents(userid):
     return records_dict
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('AUTH0_CLIENT_ID')
+app.secret_key = AUTH0_CLIENT_ID
 
 oauth = OAuth(app)
 
 oauth.register(
     "auth0",
-    client_id=os.environ.get('AUTH0_CLIENT_ID'),
-    client_secret=os.environ.get('AUTH0_CLIENT_SECRET'),
+    client_id=AUTH0_CLIENT_ID,
+    client_secret=AUTH0_CLIENT_SECRET,
     client_kwargs={
         "scope": "openid profile email",
     },
-    server_metadata_url=f"https://{os.environ.get('AUTH0_DOMAIN')}/.well-known/openid-configuration"
+    server_metadata_url=f"https://{AUTH0_DOMAIN}/.well-known/openid-configuration"
 )
 
 @app.route("/login")
@@ -151,12 +151,12 @@ def callback():
 def logout():
     session.clear()
     return redirect(
-        "https://" + os.environ.get('AUTH0_DOMAIN')
+        "https://" + AUTH0_DOMAIN
         + "/v2/logout?"
         + urlencode(
             {
                 "returnTo": url_for("home", _external=True),
-                "client_id": os.environ.get('AUTH0_CLIENT_ID'),
+                "client_id": AUTH0_CLIENT_ID,
             },
             quote_via=quote_plus,
         )
@@ -180,7 +180,7 @@ def dashboard():
     usr_id = session.get('user')['userinfo']['email']
     mood_count = get_documents(usr_id)
     if len(mood_count) > 0:
-        mood_count['Records'][0]['emotion_count']
+        mood_count = mood_count['Records'][0]['emotion_count']
     
     return render_template("dashboard.html", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4),mood_count=mood_count)
 
@@ -198,7 +198,7 @@ def video_upload():
         if video.filename == '':
             return render_template("401.html")
     
-        storage_client = storage.Client(project=os.environ.get('GCLOUD_PROJECT_ID'))
+        storage_client = storage.Client(project=GCLOUD_PROJECT_ID)
         bucket = storage_client.bucket("journalvideoanalysis")
         
         

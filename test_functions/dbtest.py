@@ -59,6 +59,7 @@ def get_user_records(userid):
 
 
 if __name__ == "__main__":
+    """    
     try:
         client.admin.command('ping')
         print("Pinged your deployment. You successfully connected to MongoDB!")
@@ -66,4 +67,10 @@ if __name__ == "__main__":
         print(e)
     
     result = get_user_records('Luffy')
-    print(result)
+    print(result['Records'][0])
+    """
+    
+    
+    db = client["UncommonHack"]
+    collection = db["User_reports"]
+    collection.insert_one({"video": "test"})
