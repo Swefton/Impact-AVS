@@ -6,6 +6,8 @@ from flask import render_template
 import json
 from test_functions.credentials import AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_DOMAIN, APP_SECRET_KEY, GCLOUD_PROJECT_ID
 from flask import request
+import datetime
+import uuid
 
 app = Flask(__name__)
 app.secret_key = APP_SECRET_KEY
@@ -52,40 +54,47 @@ def logout():
 
 
 @app.route("/")
-def home():
+def index():
     return render_template("index.html", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4))
+
+# FOR TESTING PURPOSES
+@app.route("/home")
+def home():
+    return render_template("home.html", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4))
 
 @app.route("/dashboard")
 def dashboard():
-    return render_template("dashboard.html")
+    if not session:
+        return redirect("/login")
+    return render_template("dashboard.html", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4))
 
 @app.route("/video_upload", methods=["GET", "POST"])
 def video_upload():
     if request.method == "POST":
-        if 'file' not in request.files:
-            return "No file part"
+        if not session:
+            return redirect("/login")
         
+        if 'file' not in request.files:
+            return render_template("401.html")
+    
         video = request.files['file']
         
         if video.filename == '':
-            return "No selected file"
-        
+            return render_template("401.html")
     
         storage_client = storage.Client(project=GCLOUD_PROJECT_ID)
         bucket = storage_client.bucket("journalvideoanalysis")
-        blob = bucket.blob("video.mp4")
-              
-        print(blob.metadata)
+        
+        
+        name = str(uuid.uuid4()) + ".mp4"
+        
+        blob = bucket.blob(name)
         
         blob.upload_from_file(video)
-        blob.metadata = {'user_id': '123', 'title': 'My Video'}
+        blob.metadata = {'user_id': session.get('user')['userinfo']['email'], 'time': datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}
         blob.patch()
         
-        print(blob.metadata)
-        print(
-            f"File {'video.mp4'} uploaded to {'journalvideoanalysis'}."
-        )
-    
+        
     return render_template("dashboard.html")
 
 if __name__ == "__main__":
