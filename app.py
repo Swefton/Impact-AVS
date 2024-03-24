@@ -13,8 +13,9 @@ import uuid
 import os
 
 
+client = MongoClient(uri, server_api=ServerApi('1'))
+
 def add_information(userid, info1, info2, info3, info4):
-    client = MongoClient(uri, server_api=ServerApi('1'))
     db = client['UncommonHack']
     collection = db['user_reports']
 
@@ -42,7 +43,6 @@ def add_information(userid, info1, info2, info3, info4):
 
 
 def get_documents(userid):
-    client = MongoClient(uri, server_api=ServerApi('1'))
     db = client['UncommonHack']
     collection = db['user_reports']
 
@@ -55,8 +55,10 @@ def get_documents(userid):
 
     for record in user_records:
         emotion_counter = dict()
+        chrono_emotions = []
         for item in record['records']:
             curr_emotion = item['dominant_emotion']
+            chrono_emotions.append(curr_emotion)
             try:
                emotion_counter[curr_emotion] += 1
             except:
@@ -64,7 +66,7 @@ def get_documents(userid):
             
         records_dict['Records'].append({"emotion_count": emotion_counter}) 
              
-    return records_dict
+    return records_dict, chrono_emotions
 
 def add_information(userid, info1, info2, info3, info4):
     client = MongoClient(uri, server_api=ServerApi('1'))
@@ -178,11 +180,24 @@ def dashboard():
         return redirect("/login")
     
     usr_id = session.get('user')['userinfo']['email']
-    mood_count = get_documents(usr_id)
-    if len(mood_count) > 0:
-        mood_count = mood_count['Records'][0]['emotion_count']
     
-    return render_template("dashboard.html", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4),mood_count=mood_count)
+    mood_count,chrono = get_documents(usr_id)
+
+    try:
+        mood_count = mood_count['Records'][0]['emotion_count']
+    except:
+        mood_count = {'happy': 5, 'sad': 2, 'angry': 1}
+        chrono = ['happy', 'happy', 'happy', 'happy', 'happy', 'sad', 'sad', 'angry']
+
+    db = client['UncommonHack']
+    collection = db['summary']
+    
+    _id = session.get('user')['userinfo']['email']
+    
+    summary_document = collection.find_one({'_id': _id})['summary']
+
+    return render_template("dashboard.html", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4), mood_count=mood_count, data=chrono, summary=summary_document)
+
 
 @app.route("/video_upload", methods=["GET", "POST"])
 def video_upload():

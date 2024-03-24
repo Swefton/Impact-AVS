@@ -46,8 +46,10 @@ def get_user_records(userid):
 
     for record in user_records:
         emotion_counter = dict()
+        chrono_emotions = []
         for item in record['records']:
             curr_emotion = item['dominant_emotion']
+            chrono_emotions.append(curr_emotion)
             try:
                emotion_counter[curr_emotion] += 1
             except:
@@ -55,7 +57,7 @@ def get_user_records(userid):
             
         records_dict['Records'].append({"emotion_count": emotion_counter}) 
              
-    return records_dict
+    return records_dict, chrono_emotions
 
 
 if __name__ == "__main__":
@@ -66,11 +68,15 @@ if __name__ == "__main__":
     except Exception as e:
         print(e)
     
-    result = get_user_records('Luffy')
-    print(result['Records'][0])
+    result,chrono = get_user_records('virajshah@gmail.com')
+    print(result)
+    print(chrono)
     """
     
+    _id = "shahviraj@gmail.com"
+    db = client['UncommonHack']
+    collection = db['summary']
+    summary_document = collection.find_one({'_id': _id})['summary']
+
+    print(summary_document)
     
-    db = client["UncommonHack"]
-    collection = db["User_reports"]
-    collection.insert_one({"video": "test"})

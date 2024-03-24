@@ -49,7 +49,7 @@ def analyze_sentiment(text):
 
 
 
-temp_video_path = r"test.mp4."
+temp_video_path = "/Users/akshay/Downloads/test.mp4"
 
 # Transcribe the video file
 result = model.transcribe(temp_video_path, fp16=False)
