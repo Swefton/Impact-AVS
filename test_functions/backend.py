@@ -15,7 +15,7 @@ import os
 from credentials import OPENAI_API_KEY
 
 
-api_key = OPEN
+api_key = OPENAI_API_KEY
 client_ai = OpenAI(api_key=api_key)
 
 client = MongoClient("mongodb+srv://mongodbadder:7JeXvgVz54ATft9G@uncommonhack.3k93vt8.mongodb.net/?retryWrites=true&w=majority&appName=UncommonHack")
