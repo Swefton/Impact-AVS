@@ -62,10 +62,10 @@ def dashboard():
 @app.route("/video_upload", methods=["GET", "POST"])
 def video_upload():
     if request.method == "POST":
-        if 'video' not in request.files:
+        if 'file' not in request.files:
             return "No file part"
         
-        video = request.files['video']
+        video = request.files['file']
         
         if video.filename == '':
             return "No selected file"
@@ -86,7 +86,7 @@ def video_upload():
             f"File {'video.mp4'} uploaded to {'journalvideoanalysis'}."
         )
     
-    return render_template("video_upload.html")
+    return render_template("dashboard.html")
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)

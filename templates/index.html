@@ -162,11 +162,14 @@
   <div id="FileUpload" class="wrapper">
     <div class="upload">
       <p>Drag files here or <span class="upload__button" onclick="document.getElementById('fileInput').click()">Browse</span></p>
-      <input type="file" id="fileInput" accept=".mp4, .mov" style="display: none;" onchange="handleFiles(this.files)">
+      <form action="/video_upload" method="POST" enctype="multipart/form-data" id="fileUploadForm">
+        <input type="file" name="file" id="fileInput" accept=".mp4, .mov" style="display: none;" onchange="handleFiles(this.files)">
+      </form>
     </div>
     <!-- Additional content related to file uploading can be added here if needed -->
   </div>
 </div>
+
 
 <script>
   function handleFiles(files) {
@@ -174,15 +177,14 @@
       var file = files[0];
       if (['video/mp4', 'video/quicktime'].includes(file.type)) {
         console.log("File selected:", file.name);
-        // Add additional logic here to handle the file upload or further processing
+        // Submit the form
+        document.getElementById('fileUploadForm').submit();
       } else {
         alert("Only MP4 and MOV files are allowed.");
       }
     }
   }
 </script>
-
-
 
 
 
@@ -208,6 +210,7 @@
         document.getElementById('uploadPopup').style.display = "none";
       }
     }
+
   </script>
 
 </body>
