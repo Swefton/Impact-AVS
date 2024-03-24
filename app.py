@@ -191,9 +191,10 @@ def dashboard():
 
     db = client['UncommonHack']
     collection = db['summary']
-    
-    summary_document = collection.find_one({'_id': usr_id})['summary']
 
+    summary_document = collection.find_one({'_id': usr_id})['summary']
+    
+    
     return render_template("dashboard.html", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4), mood_count=mood_count, data=chrono, summary=summary_document)
 
 

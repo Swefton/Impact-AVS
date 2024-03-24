@@ -11,9 +11,10 @@ import cv2
 from deepface import DeepFace
 from datasets import load_dataset
 from sklearn.feature_extraction.text import TfidfVectorizer
+import os
 
 
-api_key = 'cr5eMicRZSL9fic3YwujT3BlbkFJB7vV3acgX3BaXN0cM9Gy'
+api_key = "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"
 client_ai = OpenAI(api_key=api_key)
 
 client = MongoClient("mongodb+srv://mongodbadder:7JeXvgVz54ATft9G@uncommonhack.3k93vt8.mongodb.net/?retryWrites=true&w=majority&appName=UncommonHack")
@@ -25,7 +26,7 @@ storage_client = storage.Client()
 
 dataset = load_dataset("Amod/mental_health_counseling_conversations")
 corpus = [example['Context'] for example in dataset['train']]
-model = whisper.load_model('base')
+#model = whisper.load_model('base')
 
 
 def analyze_sentiment(text):
@@ -51,11 +52,20 @@ def analyze_sentiment(text):
 
 temp_video_path = "/Users/akshay/Downloads/test.mp4"
 
+full_psth = os.path.abspath(temp_video_path)
+print("full psth her", full_psth)
+print("file exists yes or no ", os.path.exists(full_psth))
+
+
 # Transcribe the video file
-result = model.transcribe(temp_video_path, fp16=False)
+#result = model.transcribe(temp_video_path, fp16=False)
 
+audio_file = open(temp_video_path,"rb")
+transcription = client_ai.audio.transcriptions.create(
+    model="whisper-1",
+    file=audio_file)
 
-transcribed_text = result["text"]
+transcribed_text = transcription.text
 
 # Preprocess the transcribed text
 nltk.download('punkt')
