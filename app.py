@@ -4,24 +4,26 @@ from google.cloud import storage
 from urllib.parse import quote_plus, urlencode
 from flask import render_template
 import json
-from test_functions.credentials import AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_DOMAIN, APP_SECRET_KEY, GCLOUD_PROJECT_ID
+#from test_functions.credentials import AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_DOMAIN, APP_SECRET_KEY, GCLOUD_PROJECT_ID
 from flask import request
 import datetime
 import uuid
+import os
+
 
 app = Flask(__name__)
-app.secret_key = APP_SECRET_KEY
+app.secret_key = os.environ.get('AUTH0_CLIENT_ID')
 
 oauth = OAuth(app)
 
 oauth.register(
     "auth0",
     client_id=AUTH0_CLIENT_ID,
-    client_secret=AUTH0_CLIENT_SECRET,
+    client_secret=os.environ.get('AUTH0_CLIENT_SECRET'),
     client_kwargs={
         "scope": "openid profile email",
     },
-    server_metadata_url=f'https://{AUTH0_DOMAIN}/.well-known/openid-configuration'
+    server_metadata_url=f'https://{os.environ.get('AUTH0_DOMAIN')}/.well-known/openid-configuration'
 )
 
 @app.route("/login")
@@ -41,12 +43,12 @@ def callback():
 def logout():
     session.clear()
     return redirect(
-        "https://" + AUTH0_DOMAIN
+        "https://" + os.environ.get('AUTH0_DOMAIN')
         + "/v2/logout?"
         + urlencode(
             {
                 "returnTo": url_for("home", _external=True),
-                "client_id": AUTH0_CLIENT_ID,
+                "client_id": os.environ.get('AUTH0_CLIENT_ID'),
             },
             quote_via=quote_plus,
         )
@@ -82,7 +84,7 @@ def video_upload():
         if video.filename == '':
             return render_template("401.html")
     
-        storage_client = storage.Client(project=GCLOUD_PROJECT_ID)
+        storage_client = storage.Client(project=os.environ.get('GCLOUD_PROJECT_ID'))
         bucket = storage_client.bucket("journalvideoanalysis")
         
         
