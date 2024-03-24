@@ -11,14 +11,13 @@ import cv2
 from deepface import DeepFace
 from datasets import load_dataset
 from sklearn.feature_extraction.text import TfidfVectorizer
-
-# Import OpenAI credentials from credentials.py
-from credentials import OPENAI_API_KEY, uri
+import os
+from credentials import OPENAI_API_KEY
 
 api_key = OPENAI_API_KEY
 client_ai = OpenAI(api_key=api_key)
 
-client = MongoClient(uri)
+client = MongoClient("mongodb+srv://mongodbadder:7JeXvgVz54ATft9G@uncommonhack.3k93vt8.mongodb.net/?retryWrites=true&w=majority&appName=UncommonHack")
 
 db = client["UncommonHack"]
 collection = db["User_Reports"]
@@ -27,7 +26,7 @@ storage_client = storage.Client()
 
 dataset = load_dataset("Amod/mental_health_counseling_conversations")
 corpus = [example['Context'] for example in dataset['train']]
-model = whisper.load_model('base')
+#model = whisper.load_model('base')
 
 
 def analyze_sentiment(text):
@@ -47,87 +46,118 @@ def analyze_sentiment(text):
     return response.choices[0].text.strip()
 
 
-@functions_framework.cloud_event
-def hello_gcs(cloud_event):
-    
-    
-    bucket_name = data["bucket"]
-    file_name = data["name"]
 
-    bucket = storage_client.bucket(bucket_name)
-    blob = bucket.blob(file_name)
-    temp_video_path = "/tmp/" + file_name
-    blob.download_to_filename(temp_video_path)
 
-    result = model.transcribe(temp_video_path, fp16=False)
 
-    transcribed_text = result["text"]
 
-    nltk.download('punkt')
-    nltk.download('stopwords')
-    nltk.download('wordnet')
-    tokens = word_tokenize(transcribed_text)
-    tokens = [token.lower() for token in tokens]
-    tokens = [token for token in tokens if token.isalpha()]
-    stop_words = set(stopwords.words('english'))
-    tokens = [token for token in tokens if token not in stop_words]
-    lemmatizer = WordNetLemmatizer()
-    lemmatized = [lemmatizer.lemmatize(token) for token in tokens]
+temp_video_path = "/Users/akshay/Downloads/test.mp4"
 
-    preprocessed_text = ' '.join(lemmatized)
-    print(preprocessed_text)
-    corpus.append(transcribed_text)
-    vectorizer = TfidfVectorizer(stop_words='english')
-    tfidf_matrix = vectorizer.fit_transform(corpus)
-    feature_names = vectorizer.get_feature_names_out()
-    tfidf_scores = tfidf_matrix.toarray()[-1]
-    word_scores = {word: score for word, score in zip(feature_names, tfidf_scores)}
-    sorted_word_scores = sorted(word_scores.items(), key=lambda x: x[1], reverse=True)
+full_psth = os.path.abspath(temp_video_path)
+print("full psth her", full_psth)
+print("file exists yes or no ", os.path.exists(full_psth))
 
-    sentiment = analyze_sentiment(preprocessed_text)
-    print(sentiment)
 
-    cap = cv2.VideoCapture(temp_video_path)
-    fps = cap.get(cv2.CAP_PROP_FPS)
+# Transcribe the video file
+#result = model.transcribe(temp_video_path, fp16=False)
 
-    emotions_dict = {}
-    while cap.isOpened():
-        ret, frame = cap.read()
-        if not ret:
-            break
+audio_file = open(temp_video_path,"rb")
+transcription = client_ai.audio.transcriptions.create(
+    model="whisper-1",
+    file=audio_file)
 
-        for i in range(int(fps) - 1):
-            cap.read()  # Read and discard
+transcribed_text = transcription.text
 
+# Preprocess the transcribed text
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+tokens = word_tokenize(transcribed_text)
+tokens = [token.lower() for token in tokens]
+tokens = [token for token in tokens if token.isalpha()]
+stop_words = set(stopwords.words('english'))
+tokens = [token for token in tokens if token not in stop_words]
+lemmatizer = WordNetLemmatizer()
+lemmatized = [lemmatizer.lemmatize(token) for token in tokens]
+preprocessed_text = ' '.join(lemmatized)
+print(preprocessed_text)
+
+# Add the transcribed text to the corpus
+corpus.append(transcribed_text)
+
+# Calculate TF-IDF scores
+vectorizer = TfidfVectorizer(stop_words='english')
+tfidf_matrix = vectorizer.fit_transform(corpus)
+feature_names = vectorizer.get_feature_names_out()
+tfidf_scores = tfidf_matrix.toarray()[-1]
+word_scores = {word: score for word, score in zip(feature_names, tfidf_scores)}
+sorted_word_scores = sorted(word_scores.items(), key=lambda x: x[1], reverse=True)
+
+# Analyze sentiment of the preprocessed text
+sentiment = analyze_sentiment(preprocessed_text)
+print(sentiment)
+
+# Analyze emotions in the video frames
+cap = cv2.VideoCapture(temp_video_path)
+fps = cap.get(cv2.CAP_PROP_FPS)
+emotions_dict = {}
+
+while cap.isOpened():
+    ret, frame = cap.read()
+    if not ret:
+        break
+
+    for i in range(int(fps) - 1):
+        cap.read()  # Read and discard
+
+    try:
+        result = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
         try:
-            result = DeepFace.analyze(frame, actions=['emotion'], enforce_detection=False)
-            try:
-                emotions_dict[result[0]['dominant_emotion']] += 1
-            except KeyError:
-                emotions_dict[result[0]['dominant_emotion']] = 1
-            print(result[0]['dominant_emotion'])
-        except Exception as e:
-            print("Error in emotion detection", e)
+            emotions_dict[result[0]['dominant_emotion']] += 1
+        except KeyError:
+            emotions_dict[result[0]['dominant_emotion']] = 1
+        print(result[0]['dominant_emotion'])
+    except Exception as e:
+        print("Error in emotion detection", e)
 
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
 
-    print(emotions_dict)
-    cap.release()
-    cv2.destroyAllWindows()
+print(emotions_dict)
+cap.release()
+cv2.destroyAllWindows()
 
-    document = {
-        "bucket": bucket_name,
-        "file": file_name,
-        "transcribed_text": transcribed_text,
-        "sentiment": sentiment,
-        "dominant_emotion": max(emotions_dict, key=emotions_dict.get),
-    }
+# Create a document with the analysis results
+document = {
 
-    result = collection.insert_one(document)
-    print(f"Inserted document with _id: {result.inserted_id}")
-    print("DONE")
+    "transcribed_text": transcribed_text,
+    "sentiment": sentiment,
+    "dominant_emotion": max(emotions_dict, key=emotions_dict.get),
+}
+
+# Insert the document into the MongoDB collection
+#result = collection.insert_one(document)
 
 
-if __name__ == "__main__":
-    hello_gcs(None, None)
+"""
+# Get the metadata from the video file in the Google Cloud bucket
+bucket_name = "your_bucket_name"
+video_file_name = "your_video_file_name.mp4"
+
+blob = storage_client.bucket(bucket_name).get_blob(video_file_name)
+metadata = blob.metadata
+
+# Access the metadata properties
+video_duration = metadata.get("duration")
+video_resolution = metadata.get("resolution")
+video_codec = metadata.get("codec")
+
+# Print the metadata
+print("Video Duration:", video_duration)
+print("Video Resolution:", video_resolution)
+print("Video Codec:", video_codec)
+"""
+
+print(document)
+
+print(f"Inserted document with _id: {result.inserted_id}")
+print("DONE")
