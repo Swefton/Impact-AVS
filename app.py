@@ -95,7 +95,7 @@ def add_information(userid, info1, info2, info3, info4):
 
 
 def get_documents(userid):
-    client = MongoClient(uri, server_api=ServerApi('1'))
+    client = MongoClient(os.environ.get('uri'), server_api=ServerApi('1'))
     db = client['UncommonHack']
     collection = db['user_reports']
 
