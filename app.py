@@ -180,7 +180,7 @@ def dashboard():
         return redirect("/login")
     
     usr_id = session.get('user')['userinfo']['email']
-    
+    print(usr_id)
     mood_count,chrono = get_documents(usr_id)
 
     try:
@@ -192,9 +192,7 @@ def dashboard():
     db = client['UncommonHack']
     collection = db['summary']
     
-    _id = session.get('user')['userinfo']['email']
-    
-    summary_document = collection.find_one({'_id': _id})['summary']
+    summary_document = collection.find_one({'_id': usr_id})['summary']
 
     return render_template("dashboard.html", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4), mood_count=mood_count, data=chrono, summary=summary_document)
 
