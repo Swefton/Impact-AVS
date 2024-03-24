@@ -7,20 +7,21 @@ from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from openai import OpenAI
-from credentials import OPENAI_API_KEY, uri
-
-client_ai = OpenAI(OPENAI_API_KEY)
+from credentials import OPENAI_API_KEY, uri, GCLOUD_PROJECT_ID
 import cv2
 from deepface import DeepFace
 from datasets import load_dataset
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+api_key = OPENAI_API_KEY
+client_ai = OpenAI(api_key=api_key)
 
 client = MongoClient(uri)
 
 db = client["user_info"]
 collection = db["videoanalyses"]
 
-storage_client = storage.Client()
+storage_client = storage.Client(GCLOUD_PROJECT_ID)
 dataset = load_dataset("Amod/mental_health_counseling_conversations")
 corpus = [example['Context'] for example in dataset['train']]
 model = whisper.load_model('base')
@@ -42,18 +43,19 @@ def analyze_sentiment(text):
 
     return response.choices[0].text.strip()
 
-def hello_gcs():
-    #data = cloud_event.data
-    #bucket_name = data["bucket"]
-    #file_name = data["name"]
+def hello_gcs(data, context):
+    bucket_name = data["bucket"]
+    file_name = data["name"]
 
-    #bucket = storage_client.bucket(bucket_name)
-    #blob = bucket.blob("/Users/siddsatish/Desktop/finer_vid_short.wav")
-    temp_video_path = "/Users/siddsatish/Desktop/Screen Recording 2024-01-28 at 11.17.48 AM.mov"
-    #blob.download_to_filename("/Users/siddsatish/Desktop/finer_vid_short.wav")
+    bucket = storage_client.bucket(bucket_name)
+    blob = bucket.blob(file_name)
+    temp_video_path = "/tmp/" + file_name
+    blob.download_to_filename(temp_video_path)
+
     result = model.transcribe(temp_video_path, fp16=False)
 
     transcribed_text = result["text"]
+
     nltk.download('punkt')
     nltk.download('stopwords')
     nltk.download('wordnet')
@@ -107,23 +109,17 @@ def hello_gcs():
     cap.release()
     cv2.destroyAllWindows()
 
-    # document = {
-    #     "event_id": cloud_event["id"],
-    #     "event_type": cloud_event["type"],
-    #     "bucket": bucket_name,
-    #     "file": file_name,
-    #     "created": data["timeCreated"],
-    #     "updated": data["updated"],
-    #     "sentiment": sentiment,
-    #     "dominant_emotion": max(emotions_dict, key=emotions_dict.get),
-    #
-    # }
+    document = {
+        "bucket": bucket_name,
+        "file": file_name,
+        "transcribed_text": transcribed_text,
+        "sentiment": sentiment,
+        "dominant_emotion": max(emotions_dict, key=emotions_dict.get),
+    }
 
-    # result = collection.insert_one(document)
-    # print(f"Inserted document with _id: {result.inserted_id}")
+    result = collection.insert_one(document)
+    print(f"Inserted document with _id: {result.inserted_id}")
     print("DONE")
 
-hello_gcs()
-
 if __name__ == "__main__":
-    hello_gcs(None)
+    hello_gcs(None, None)
