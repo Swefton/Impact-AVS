@@ -12,9 +12,10 @@ from deepface import DeepFace
 from datasets import load_dataset
 from sklearn.feature_extraction.text import TfidfVectorizer
 import os
+from credentials import OPENAI_API_KEY
 
 
-api_key = "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"
+api_key = OPEN
 client_ai = OpenAI(api_key=api_key)
 
 client = MongoClient("mongodb+srv://mongodbadder:7JeXvgVz54ATft9G@uncommonhack.3k93vt8.mongodb.net/?retryWrites=true&w=majority&appName=UncommonHack")
