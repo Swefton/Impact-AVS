@@ -53,8 +53,11 @@ def logout():
 
 @app.route("/")
 def home():
-    return render_template("/Impact/index.html", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4))
+    return render_template("index.html", session=session.get('user'), pretty=json.dumps(session.get('user'), indent=4))
 
+@app.route("/dashboard")
+def dashboard():
+    return render_template("dashboard.html")
 
 @app.route("/video_upload", methods=["GET", "POST"])
 def video_upload():
