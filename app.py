@@ -6,7 +6,7 @@ from flask import render_template
 import json
 from pymongo import MongoClient
 from pymongo.server_api import ServerApi
-from test_functions.credentials import AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_DOMAIN, APP_SECRET_KEY, GCLOUD_PROJECT_ID, uri
+#from test_functions.credentials import AUTH0_CLIENT_ID, AUTH0_CLIENT_SECRET, AUTH0_DOMAIN, APP_SECRET_KEY, GCLOUD_PROJECT_ID, uri
 from flask import request
 import datetime
 import uuid
