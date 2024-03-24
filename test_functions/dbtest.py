@@ -45,16 +45,16 @@ def get_user_records(userid):
     }
 
     for record in user_records:
+        emotion_counter = dict()
         for item in record['records']:
-            record_info = {
-                'ID Datetime': item['id_datetime'],
-                'Info1': item['info1'],
-                'Info2': item['info2'],
-                'Info3': item['info3'],
-                'Info4': item['info4']
-            }
-            records_dict['Records'].append(record_info)
-    
+            curr_emotion = item['dominant_emotion']
+            try:
+               emotion_counter[curr_emotion] += 1
+            except:
+               emotion_counter[curr_emotion] = 1
+            
+        records_dict['Records'].append({"emotion_count": emotion_counter}) 
+             
     return records_dict
 
 
@@ -64,5 +64,6 @@ if __name__ == "__main__":
         print("Pinged your deployment. You successfully connected to MongoDB!")
     except Exception as e:
         print(e)
-
-    print(get_user_records('1235')['Records'])
+    
+    result = get_user_records('Luffy')
+    print(result)

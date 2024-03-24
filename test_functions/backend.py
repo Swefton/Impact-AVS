@@ -1,27 +1,30 @@
 from google.cloud import storage
 from pymongo import MongoClient
-import whisper
 from textblob import TextBlob
+import whisper
 import nltk
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
 from nltk.stem import WordNetLemmatizer
 from openai import OpenAI
-from credentials import OPENAI_API_KEY, uri, GCLOUD_PROJECT_ID
 import cv2
 from deepface import DeepFace
 from datasets import load_dataset
 from sklearn.feature_extraction.text import TfidfVectorizer
+
+# Import OpenAI credentials from credentials.py
+from credentials import OPENAI_API_KEY, uri
 
 api_key = OPENAI_API_KEY
 client_ai = OpenAI(api_key=api_key)
 
 client = MongoClient(uri)
 
-db = client["user_info"]
-collection = db["videoanalyses"]
+db = client["UncommonHack"]
+collection = db["User_Reports"]
 
-storage_client = storage.Client(GCLOUD_PROJECT_ID)
+storage_client = storage.Client()
+
 dataset = load_dataset("Amod/mental_health_counseling_conversations")
 corpus = [example['Context'] for example in dataset['train']]
 model = whisper.load_model('base')
@@ -43,7 +46,11 @@ def analyze_sentiment(text):
 
     return response.choices[0].text.strip()
 
-def hello_gcs(data, context):
+
+@functions_framework.cloud_event
+def hello_gcs(cloud_event):
+    
+    
     bucket_name = data["bucket"]
     file_name = data["name"]
 
@@ -120,6 +127,7 @@ def hello_gcs(data, context):
     result = collection.insert_one(document)
     print(f"Inserted document with _id: {result.inserted_id}")
     print("DONE")
+
 
 if __name__ == "__main__":
     hello_gcs(None, None)

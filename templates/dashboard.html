@@ -10,6 +10,7 @@
         <link href="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/style.min.css" rel="stylesheet" />
         <link href="{{ url_for('static', filename='css/styles.css') }}" rel="stylesheet" />
         <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     </head>
     <body class="sb-nav-fixed">
         <nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
@@ -154,9 +155,9 @@
                                 <div class="card mb-4">
                                     <div class="card-header">
                                         <i class="fas fa-chart-area me-1"></i>
-                                        Area Chart Example
+                                        Mood Count Chart
                                     </div>
-                                    <div class="card-body"><canvas id="myAreaChart" width="100%" height="40"></canvas></div>
+                                    <div class="card-body"><canvas id="myMoodChart" width="100%" height="40"></canvas></div>                                        
                                 </div>
                             </div>
                             <div class="col-xl-6">
@@ -680,5 +681,46 @@
         <script src="{{ url_for('static', filename='assets/demo/chart-bar-demo.js') }}"></script>
         <script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
         <script src="{{ url_for('static', filename='js/datatables-simple-demo.js') }}"></script>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                // Get mood count data from Flask template variable
+                var moodData = {{ mood_count|tojson }};
+            
+                // Get canvas element
+                var ctx = document.getElementById('myMoodChart').getContext('2d');
+            
+                // Create chart
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: Object.keys(moodData), // Labels for x-axis
+                        datasets: [{
+                            label: 'Mood Count',
+                            data: Object.values(moodData), // Values for y-axis
+                            backgroundColor: [
+                                'rgba(255, 99, 132, 0.2)',
+                                'rgba(54, 162, 235, 0.2)',
+                                'rgba(255, 206, 86, 0.2)',
+                                // Add more colors if needed
+                            ],
+                            borderColor: [
+                                'rgba(255, 99, 132, 1)',
+                                'rgba(54, 162, 235, 1)',
+                                'rgba(255, 206, 86, 1)',
+                                // Add more colors if needed
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            });
+            </script>
     </body>
 </html>
