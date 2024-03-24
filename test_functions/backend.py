@@ -14,7 +14,6 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 import os
 from credentials import OPENAI_API_KEY
 
-
 api_key = OPENAI_API_KEY
 client_ai = OpenAI(api_key=api_key)
 
