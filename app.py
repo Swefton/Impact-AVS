@@ -224,8 +224,7 @@ def video_upload():
         blob.metadata = {'user_id': session.get('user')['userinfo']['email'], 'time': datetime.datetime.now().strftime("%Y-%m-%d-%H-%M-%S")}
         blob.patch()
         
-        
-    return render_template("dashboard.html")
+    return render_template("dashboard.html", mood_count = {}, data = [], summary = {})
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=3000, debug=True)
