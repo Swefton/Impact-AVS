@@ -18,7 +18,7 @@ oauth = OAuth(app)
 
 oauth.register(
     "auth0",
-    client_id=AUTH0_CLIENT_ID,
+    client_id=os.environ.get('AUTH0_CLIENT_ID'),
     client_secret=os.environ.get('AUTH0_CLIENT_SECRET'),
     client_kwargs={
         "scope": "openid profile email",
