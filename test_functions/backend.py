@@ -137,6 +137,26 @@ document = {
 # Insert the document into the MongoDB collection
 #result = collection.insert_one(document)
 
+
+"""
+# Get the metadata from the video file in the Google Cloud bucket
+bucket_name = "your_bucket_name"
+video_file_name = "your_video_file_name.mp4"
+
+blob = storage_client.bucket(bucket_name).get_blob(video_file_name)
+metadata = blob.metadata
+
+# Access the metadata properties
+video_duration = metadata.get("duration")
+video_resolution = metadata.get("resolution")
+video_codec = metadata.get("codec")
+
+# Print the metadata
+print("Video Duration:", video_duration)
+print("Video Resolution:", video_resolution)
+print("Video Codec:", video_codec)
+"""
+
 print(document)
 
 print(f"Inserted document with _id: {result.inserted_id}")
