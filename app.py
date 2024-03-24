@@ -212,7 +212,7 @@ def video_upload():
         if video.filename == '':
             return render_template("401.html")
     
-        storage_client = storage.Client(project=os.environ.get(GCLOUD_PROJECT_ID))
+        storage_client = storage.Client(project=os.environ.get('GCLOUD_PROJECT_ID'))
         bucket = storage_client.bucket("journalvideoanalysis")
         
         
